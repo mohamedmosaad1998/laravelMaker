@@ -16,10 +16,8 @@ class CreateSectionsTable extends Migration
         Schema::create('sections', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->string('type')->spatialIndex();
             $table->json('data')->nullable();
             $table->unsignedBigInteger('app_manger_id');
-            $table->softDeletesTz();
             $table->timestampsTz();
         });
     }

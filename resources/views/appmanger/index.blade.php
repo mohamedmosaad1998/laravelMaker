@@ -19,7 +19,7 @@
                                 <div class="col-md-4 mb-2  mt-2 ">
                                     <div class="card  border-0">
                                         <div class="card-header shadow-sm rounded-0 text-center  border-0 bg-danger">
-                                            <h3><a class="text-white nav-link" href="{{route('appmanger.show',$appManger)}}">{{$appManger->name}}</a></h3>
+                                            <h3><a class="text-white nav-link" href="{{route('appmanger.showSections',$appManger)}}">{{$appManger->name}}</a></h3>
                                         </div>
                                         <div class="card-body">
                                             {!! Form::open(['route' => ['appmanger.destroy',$appManger], 'method' => 'delete']) !!}

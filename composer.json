@@ -17,7 +17,7 @@
         "doctrine/dbal": "^2.10",
         "facade/ignition": "^1.4",
         "fzaninotto/faker": "^1.4",
-        "laravel/homestead": "^10.0",
+        "laravel/homestead": "^10.1",
         "laravel/ui": "^1",
         "laravelcollective/errors": "^1.0",
         "laravelcollective/html": "^6.0",

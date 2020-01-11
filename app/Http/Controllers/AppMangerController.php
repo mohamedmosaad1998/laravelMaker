@@ -15,14 +15,10 @@ class AppMangerController extends Controller{
 //        $this->authorizeResource(AppManger::class,'appmanger');
     }
 
-    public function index(){
-        return view('appmanger.index',['appmangers'=>AppManger::paginate()]);
-    }
+    public function index(){ return view('appmanger.index',['appmangers'=>AppManger::paginate()]); }
 
 
-    public function create(){
-        return view('appmanger.create');
-    }
+    public function create(){ return view('appmanger.create'); }
     // AppMangerCreateRequest
     public function store(Request $request) {
         $user=auth()->check()? auth()->user():null;
@@ -34,47 +30,10 @@ class AppMangerController extends Controller{
         return back();
     }
 
-    public function show(AppManger $appmanger) {
+    public function show(AppManger $appmanger) { return view('appmanger.show',['appmanger'=>$appmanger]); }
 
-        return view('appmanger.show',['appmanger'=>$appmanger]);
-    }
-    public function type(AppManger $appmanger,$type) {
-        if (file_exists(resource_path('views/includes/'.$type.'.blade.php')) )
-            return view('appmanger.show',['appmanger'=>$appmanger,'link'=>$type]);
-        else return redirect()->route('appmanger.show',$appmanger);
+    public function edit(AppManger $appmanger) { return view('appmanger.edit',['appmanger'=>$appmanger]); }
 
-    }
-
-    public function edit(AppManger $appmanger) {
-        return view('appmanger.edit',['appmanger'=>$appmanger]);
-    }
-
-    public function typeShow(AppManger $appmanger,$type,Section $section) {
-        $data=config('mainData.types',[]);
-
-        if ( in_array(strtolower($section->type), $data) && in_array($type, $data) ){
-            return view('appmanger.section.index',compact('appmanger','section','type'));
-        }
-        return redirect()->route('appmanger.show',$appmanger);
-    }
-    public function typeStore(Request $request,AppManger $appmanger,$type) {
-        $request['type']=$type;
-        $request['name']=ucfirst($request['name']).ucfirst($type);
-        $validator=$request->validate([
-            'name' => ['required',
-                Rule::unique('sections')
-                    ->where(function ($query) use ($appmanger, $request) {
-                        return $query->where('name',$request['name'])
-                            ->where('app_manger_id',$appmanger->id);
-                    })
-            ],
-            'type' => ['required',Rule::in(config('mainData.types',[]))]
-        ]);
-        $validator['data']=config('mainData.data',[]);
-        $section=Section::firstOrCreate($appmanger->sections()->create($validator)->only('name'));
-
-        return redirect()->route('appmanger.section.show',['appmanger'=>$appmanger,'type'=>$type,'section'=>$section]);
-    }
 
     // AppMangerUpdateRequest
     public function update(Request $request, AppManger $appmanger) {
@@ -94,13 +53,36 @@ class AppMangerController extends Controller{
         return redirect()->route('appmanger.index');
     }
 
-    public function sectionUpdate(Request $request,Section $section){
-            if ($request->has('data')){
-                $section->update([
-                    'data'=>$request->data
-                ]);
-            }
-            dd($section->data);
-            return back();
+
+    // Sections
+
+    public function createSection(AppManger $appmanger) { return view('appmanger.SectionCreate',['appmanger'=>$appmanger]); }
+
+    public function showSections(AppManger $appmanger){ return view('appmanger.showModels',['appmanger'=>$appmanger]); }
+
+    public function showSection(AppManger $appmanger,Section $section){ return view('appmanger.showModels',compact('appmanger','section')); }
+
+    public function typeStore(Request $request,AppManger $appmanger) {
+        $request->validate([
+            'name'=>['required','string'],
+            'options'=>['required','array'],
+        ]);
+
+        $data=str_replace('"on"', '"true"', collect($request->options)->toJson());
+        $data=str_replace('"off"', '"false"',$data);
+        $options=collect(
+            json_decode($data))->map(function ($key,$value){
+            return ((is_object($key)? collect($key)->map(function($kk,$vv){
+                return (is_object($kk)? collect($kk)->toArray(): $kk);
+            })->toArray() : $key));
+        })->toArray();
+        $section=$appmanger->sections()->create([
+            'name'=>ucfirst($request->name),
+            'data'=>$options,
+        ]);
+        return back();
+
     }
+
+
 }
